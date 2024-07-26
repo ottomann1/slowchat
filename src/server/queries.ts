@@ -5,12 +5,13 @@ import { db } from "./db";
 type NewMessage = typeof message.$inferInsert;
 type NewUser = typeof user.$inferInsert;
 
-export async function getMessages() {
+export async function getMessages(): Promise<NewMessage[]> {
   const messages = await db.select().from(message);
   return messages;
 }
 
 export async function writeMessage(newmsg: NewMessage) {
+  newmsg.time = new Date();
   const sentMessage = await db.insert(message).values(newmsg).returning();
   return sentMessage;
 }
