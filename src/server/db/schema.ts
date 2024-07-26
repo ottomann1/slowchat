@@ -23,3 +23,24 @@ export const messageRelations = relations(message, ({ one }) => ({
     references: [user.id],
   }),
 }));
+
+const fakechats = [
+  {
+    id: 1,
+    userId: 1,
+    content: "hello whats up",
+    time: new Date(),
+  },
+  {
+    id: 2,
+    userId: 1,
+    content: "this app is amazing",
+    time: new Date(),
+  },
+  {
+    id: 3,
+    userId: 2,
+    content: "i agree",
+    time: new Date(),
+  },
+];

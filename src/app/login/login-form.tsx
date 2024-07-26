@@ -13,7 +13,7 @@ export function LoginForm(){
     event.preventDefault();
     try {
       await auth(username, password);
-      router.push('/');
+      router.push('/chat');
     } catch (err) {
       setError('Invalid password. Please try again.');
     }

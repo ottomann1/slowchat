@@ -17,7 +17,6 @@ export const auth = async (username: string, password: string) => {
 
 export async function isLoggedIn(): Promise<boolean> {
   const user = cookies().get("slowuser")?.value;
-  console.log(user);
   if (!user) return false;
   else return true;
 }
