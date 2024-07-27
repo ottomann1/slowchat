@@ -1,21 +1,21 @@
 import { fetchAllUnfetchedMessages, fetchFetchedMessages, getMessages, getTokensLeft } from '@/server/queries';
 import ChatBox from './chat-box';
 import { message, user } from '@/server/db/schema';
-import { getUserId } from '@/server/auth/auth';
+import { getUser } from '@/server/auth/auth';
 import FetchBox from './fetch-box';
 type Message = typeof message.$inferSelect;
 type User = typeof user.$inferSelect;
 export default async function ChatPage() {
-  const currUserId: number = await getUserId();
-  const fetchesLeft = await getTokensLeft(currUserId);
-  const importMessages = await fetchAllUnfetchedMessages(currUserId);
+  const currUser:User = await getUser();
+  const fetchesLeft = await getTokensLeft(currUser.id);
+  const importMessages = await fetchAllUnfetchedMessages(currUser.id);
   const fetchProps = {importMessages, fetchesLeft}
   console.log("tokens left ", fetchesLeft)
   console.log("fetchporps", fetchProps)
   return (
     <div>
-      <ChatBox userId={currUserId} />
-
+      <ChatBox userId={currUser.id} />
+      <div className="divider"></div>
       <FetchBox fetchProps={fetchProps}/>
 
     </div>

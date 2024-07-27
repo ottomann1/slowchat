@@ -4,10 +4,21 @@ import { message } from '@/server/db/schema';
 import ChatInput from './chat-input';
 import ChatMsgs from './chat-msgs';
 import { fetchFetchedMessages } from '@/server/queries';
-type Message = typeof message.$inferSelect;
 interface ChatBoxProps {
   userId:number
 }
+
+interface Message {
+    id: number;
+    userId: number;
+    content: string;
+    time: Date;
+    author: {
+        id: number;
+        name: string;
+    }
+}
+
 export default async function ChatBox({userId}:ChatBoxProps) {
 
   const messages: Message[]= await fetchFetchedMessages(userId);

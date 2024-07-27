@@ -31,3 +31,12 @@ body {
     text-wrap: balance;
   }
 }
+
+.username {
+  margin-right: 2px; /* Adjust the value as needed */
+}
+
+.chat-header {
+  display: flex;
+  align-items: center;
+}

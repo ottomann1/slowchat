@@ -6,6 +6,7 @@ import { eq, inArray, ne, notInArray } from "drizzle-orm";
 type getMessage = typeof message.$inferSelect;
 type NewMessage = typeof message.$inferInsert;
 type NewUser = typeof user.$inferInsert;
+type getUser = typeof user.$inferSelect;
 type getToken = typeof tokens.$inferSelect;
 
 export async function getMessages(): Promise<getMessage[]> {
@@ -19,15 +20,14 @@ export async function postMessage(newmsg: NewMessage) {
   return sentMessage;
 }
 
-export async function getDbUserId(userName: string): Promise<number> {
+export async function getDbUser(userName: string): Promise<getUser> {
   console.log(userName);
-  const userId = await db
-    .select()
-    .from(user)
-    .where(eq(user.name, userName))
-    .limit(1);
-  console.log(userId);
-  return userId[0].id;
+
+  const gottenUser = await db.query.user.findFirst({
+    where: eq(user.name, userName),
+  });
+  if (!gottenUser) throw new Error("User not found");
+  return gottenUser;
 }
 
 export async function getUsers() {
