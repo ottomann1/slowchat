@@ -21,12 +21,12 @@ export function LoginForm(){
 
 
 return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="p-6 bg-white rounded shadow-md w-80">
-        <h1 className="mb-4 text-2xl font-bold text-center">Login</h1>
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="card glass shadow-md w-400 p-10">
+        <h1 className="mb-4 text-2xl font-bold text-center text-white">Login</h1>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label className="block mb-2 text-sm font-bold text-gray-700">
+            <label className="block mb-2 text-sm font-bold text-white">
               Username
             </label>
             <input
@@ -38,7 +38,7 @@ return (
             />
           </div>
           <div className="mb-4">
-            <label className="block mb-2 text-sm font-bold text-gray-700">
+            <label className="block mb-2 text-sm font-bold text-white">
               Password
             </label>
             <input
@@ -53,7 +53,7 @@ return (
           <div className="flex items-center justify-between">
             <button
               type="submit"
-              className="w-full px-4 py-2 font-bold text-white bg-blue-500 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+              className="w-full px-4 py-2 font-bold text-white bg-black rounded hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
             >
               Login
             </button>

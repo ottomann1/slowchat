@@ -236,7 +236,6 @@ export async function getStatistics(): Promise<Statistics[]> {
     )
     .groupBy(fetchedMessages.userId);
 
-  // Consolidate the data
   const userStatistics = userMessagesCount.map((userMsg) => {
     const fetchCount =
       userFetchesCount.find((ufc) => ufc.userId === userMsg.userId)
@@ -248,7 +247,6 @@ export async function getStatistics(): Promise<Statistics[]> {
     const totalMessages = userMsg.totalMessages;
     const totalFetches = fetchCount;
     let totalFetchedMessages = fetchNoCooldownCount;
-    // totalFetchedMessages = fetchNoCooldownCount - totalMessages;
     if (totalFetchedMessages < 0) {
       totalFetchedMessages = 0;
     }
@@ -267,7 +265,6 @@ export async function getStatistics(): Promise<Statistics[]> {
     };
   });
 
-  // Sort by username
   userStatistics.sort((a, b) => a.username.localeCompare(b.username));
 
   return userStatistics;
