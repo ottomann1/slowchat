@@ -4,6 +4,7 @@ import { serial, text, timestamp, pgTable, integer } from "drizzle-orm/pg-core";
 export const user = pgTable("users", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
+  totalFetches: integer("total_fetches").default(0).notNull(),
 });
 
 export const userRelations = relations(user, ({ many, one }) => ({
@@ -49,5 +50,5 @@ export const fetchedMessagesRelations = relations(
       fields: [fetchedMessages.messageId],
       references: [message.id],
     }),
-  }),
+  })
 );

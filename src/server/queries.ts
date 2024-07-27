@@ -1,7 +1,7 @@
 import "server-only";
 import { message, user, tokens, fetchedMessages } from "./db/schema";
 import { db } from "./db";
-import { eq, inArray, ne, notInArray } from "drizzle-orm";
+import { count, eq, lt, inArray, ne, notInArray, and } from "drizzle-orm";
 
 type getMessage = typeof message.$inferSelect;
 type NewMessage = typeof message.$inferInsert;
@@ -51,6 +51,20 @@ export async function createFetchTokens(userId: number) {
     .execute();
 }
 
+export async function incrementUserFetches(userId: number) {
+  const currUser = await db.query.user.findFirst({
+    where: eq(user.id, userId),
+  });
+  if (!currUser) throw new Error("User can't be found");
+  await db
+    .update(user)
+    .set({
+      totalFetches: currUser.totalFetches + 1,
+    })
+    .where(eq(user.id, userId))
+    .execute();
+}
+
 export async function fetchMessagesOffCooldown(userId: number): Promise<any[]> {
   const now = new Date();
   const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
@@ -66,10 +80,13 @@ export async function fetchMessagesOffCooldown(userId: number): Promise<any[]> {
     userId,
     messageId: msg.id,
   }));
+  console.log(fetchedMessageRecords);
+  if (!fetchedMessageRecords[0]) throw new Error("No fetchable messages");
 
   await db.insert(fetchedMessages).values(fetchedMessageRecords).execute();
 
   decrementFetchToken(userId);
+  incrementUserFetches(userId);
   return messagesOffCooldown.map((msg) => ({
     id: msg.id,
     content: msg.content,
@@ -175,4 +192,83 @@ export async function decrementFetchToken(userId: number) {
   } else {
     throw new Error("No fetch tokens left");
   }
+}
+
+interface Statistics {
+  userId: number;
+  username: string;
+  totalMessages: number;
+  totalFetches: number;
+  totalAverageMessagesPerFetch: number;
+  totalFetchesNoCooldown: number;
+}
+
+export async function getStatistics(): Promise<Statistics[]> {
+  const userMessagesCount = await db
+    .select({
+      userId: user.id,
+      username: user.name,
+      totalMessages: count(message.id),
+    })
+    .from(user)
+    .leftJoin(message, eq(user.id, message.userId))
+    .groupBy(user.id);
+
+  const userFetchesCount = await db
+    .select({
+      userId: user.id,
+      totalFetches: user.totalFetches,
+    })
+    .from(user);
+
+  const userFetchesNoCooldownCount = await db
+    .select({
+      userId: fetchedMessages.userId,
+      totalFetchesNoCooldown: count(fetchedMessages.messageId),
+    })
+    .from(fetchedMessages)
+    .leftJoin(message, eq(fetchedMessages.messageId, message.id))
+    .where(
+      and(
+        lt(message.time, new Date(new Date().getTime() - 60 * 60 * 1000)),
+        ne(message.userId, fetchedMessages.userId),
+      ),
+    )
+    .groupBy(fetchedMessages.userId);
+
+  // Consolidate the data
+  const userStatistics = userMessagesCount.map((userMsg) => {
+    const fetchCount =
+      userFetchesCount.find((ufc) => ufc.userId === userMsg.userId)
+        ?.totalFetches || 0;
+    const fetchNoCooldownCount =
+      userFetchesNoCooldownCount.find((ufnc) => ufnc.userId === userMsg.userId)
+        ?.totalFetchesNoCooldown || 0;
+
+    const totalMessages = userMsg.totalMessages;
+    const totalFetches = fetchCount;
+    let totalFetchedMessages = fetchNoCooldownCount;
+    // totalFetchedMessages = fetchNoCooldownCount - totalMessages;
+    if (totalFetchedMessages < 0) {
+      totalFetchedMessages = 0;
+    }
+    let totalAverageMessagesPerFetch = 0;
+    if (totalFetches > 0 && totalFetchedMessages > 0) {
+      totalAverageMessagesPerFetch = totalFetchedMessages / totalFetches;
+    }
+
+    return {
+      userId: userMsg.userId,
+      username: userMsg.username,
+      totalMessages,
+      totalFetches,
+      totalAverageMessagesPerFetch,
+      totalFetchesNoCooldown: totalFetchedMessages,
+    };
+  });
+
+  // Sort by username
+  userStatistics.sort((a, b) => a.username.localeCompare(b.username));
+
+  return userStatistics;
 }

@@ -4,8 +4,8 @@ import { fetchMessagesOffCD } from "@/actions/actions";
 import { useEffect, useState } from "react";
 import { formatDate, formatTime } from "@/lib/dateUtils";
 
-interface FetchProps{
-  fetchProps: FetchBoxProps
+interface FetchProps {
+  fetchProps: FetchBoxProps;
 }
 
 interface FetchBoxProps {
@@ -26,9 +26,10 @@ interface Message {
   onCooldown: boolean;
 }
 
-export default function FetchBox({ fetchProps }:FetchProps) {
-
-  const [messages, setMessages] = useState<Message[]>(fetchProps.importMessages);
+export default function FetchBox({ fetchProps }: FetchProps) {
+  const [messages, setMessages] = useState<Message[]>(
+    fetchProps.importMessages
+  );
   const [tokens, setTokens] = useState<number>(fetchProps.fetchesLeft);
 
   const calculateCooldown = (messageTime: Date) => {
@@ -44,7 +45,9 @@ export default function FetchBox({ fetchProps }:FetchProps) {
     <div className="flex flex-col items-center">
       <div>Fetches left: {tokens}</div>
       <form action={fetchMessagesOffCD}>
-        <button type="submit" className="btn btn-lg m-4">Fetch Messages Off Cooldown</button>
+        <button type="submit" className="btn btn-lg m-4">
+          Fetch Messages Off Cooldown
+        </button>
       </form>
       <div className="card bg-base-300 rounded-box p-4 text-center">
         <div>Unfetched messages:</div>
@@ -52,14 +55,18 @@ export default function FetchBox({ fetchProps }:FetchProps) {
           {messages.map((msg) => (
             <div key={msg.id} className="card bg-neutral p-1 m-1">
               <p>
-                <strong>Message from {msg.author.name}</strong><br />
+                <strong>Message from {msg.author.name}</strong>
+                <br />
                 {msg.onCooldown
-                  ? `On cooldown for ${calculateCooldown(new Date(msg.time))} minutes`
+                  ? `On cooldown for ${calculateCooldown(
+                      new Date(msg.time)
+                    )} minutes`
                   : `Ready to be fetched`}
               </p>
               <p>
                 <em>
-                  Posted {formatDate(new Date(msg.time))} at {formatTime(new Date(msg.time))}
+                  Posted {formatDate(new Date(msg.time))} at{" "}
+                  {formatTime(new Date(msg.time))}
                 </em>
               </p>
             </div>

@@ -2,7 +2,7 @@
 import { getLoggedIn, getUserId, logout } from "@/server/auth/auth";
 import { db } from "@/server/db";
 import { fetchedMessages, message } from "@/server/db/schema";
-import { fetchMessagesOffCooldown, postMessage } from "@/server/queries";
+import { fetchMessagesOffCooldown, getDbUser, postMessage } from "@/server/queries";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 

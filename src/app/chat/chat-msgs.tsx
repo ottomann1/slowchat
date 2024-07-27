@@ -20,9 +20,6 @@ interface Message {
 export default function ChatMsgs({ messages }: ChatMsgsProps) {
   const [currMessages, setMessages] = useState<Message[]>(messages);
 
-
-
-
   return (
     <div className="card bg-base-300 rounded-box p-4">
       {currMessages.map((message) => (
@@ -31,7 +28,8 @@ export default function ChatMsgs({ messages }: ChatMsgsProps) {
             <span className="username">{message.author.name}</span>
             <span className="text-xs opacity-50 ml-1">
               {"- "}
-              {formatDate(new Date(message.time))} at {formatTime(new Date(message.time))}
+              {formatDate(new Date(message.time))} at{" "}
+              {formatTime(new Date(message.time))}
             </span>
           </div>
           <div className="chat-bubble">{message.content}</div>

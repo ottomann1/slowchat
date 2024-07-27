@@ -1,14 +1,13 @@
-"use client"
+"use client";
 import { addMessage } from "@/actions/actions";
 import { useState } from "react";
 
+export default function ChatInput() {
+  const [newMessage, setNewMessage] = useState("");
 
-export default function ChatInput(){
-  const [newMessage, setNewMessage] = useState('');
-
-return (      <div className="card bg-base-300 rounded-box grid h-20 place-items-center p-4">
-        <form action={addMessage}>
-
+  return (
+    <div className="card bg-base-300 rounded-box grid h-20 place-items-center p-4">
+      <form action={addMessage}>
         <div className="join">
           <input
             type="text"
@@ -16,14 +15,12 @@ return (      <div className="card bg-base-300 rounded-box grid h-20 place-items
             className="input input-bordered w-full max-w-xs"
             name="message"
             onChange={(e) => setNewMessage(e.target.value)}
-
           />
           <button className="btn" type="submit">
             Send
           </button>
-
         </div>
-          </form>
-
-      </div>)
+      </form>
+    </div>
+  );
 }
