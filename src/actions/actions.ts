@@ -11,14 +11,14 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 type NewMessage = typeof message.$inferInsert;
-export async function addMessage(formData: FormData) {
+export async function addMessage(inputMsg: string) {
   const currUserId = await getUserId();
 
   console.log(currUserId);
-  console.log(formData);
+  console.log(inputMsg);
   const newMsg: NewMessage = {
     userId: Number(currUserId),
-    content: formData.get("message") as string,
+    content: inputMsg,
     time: new Date(),
   };
   const sentMessage = await db.insert(message).values(newMsg).returning();
@@ -29,7 +29,6 @@ export async function addMessage(formData: FormData) {
       messageId: sentMessage[0].id,
     })
     .execute();
-  // redirect("/");
   revalidatePath("/");
   revalidatePath("/chat");
 }
@@ -37,7 +36,6 @@ export async function addMessage(formData: FormData) {
 export async function fetchMessagesOffCD() {
   const currUserId = await getUserId();
   await fetchMessagesOffCooldown(currUserId);
-  // redirect("/");
   revalidatePath("/");
   revalidatePath("/chat");
 }

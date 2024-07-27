@@ -15,7 +15,9 @@ export const userRelations = relations(user, ({ many, one }) => ({
 
 export const message = pgTable("messages", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull(),
+  userId: integer("user_id")
+    .references(() => user.id, { onDelete: "cascade" })
+    .notNull(),
   content: text("content").notNull(),
   time: timestamp("time").defaultNow().notNull(),
 });
@@ -29,14 +31,16 @@ export const messageRelations = relations(message, ({ one, many }) => ({
 }));
 
 export const tokens = pgTable("tokens", {
-  userId: integer("user_id").references(() => user.id),
+  userId: integer("user_id").references(() => user.id, { onDelete: "cascade" }),
   dailyTokens: integer("daily_tokens").default(1).notNull(),
   weeklyTokens: integer("weekly_tokens").default(2).notNull(),
 });
 
 export const fetchedMessages = pgTable("fetched_messages", {
-  userId: integer("user_id").references(() => user.id),
-  messageId: integer("message_id").references(() => message.id),
+  userId: integer("user_id").references(() => user.id, { onDelete: "cascade" }),
+  messageId: integer("message_id").references(() => message.id, {
+    onDelete: "cascade",
+  }),
 });
 
 export const fetchedMessagesRelations = relations(
@@ -50,5 +54,5 @@ export const fetchedMessagesRelations = relations(
       fields: [fetchedMessages.messageId],
       references: [message.id],
     }),
-  })
+  }),
 );
