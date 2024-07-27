@@ -2,7 +2,11 @@
 import { getLoggedIn, getUserId, logout } from "@/server/auth/auth";
 import { db } from "@/server/db";
 import { fetchedMessages, message } from "@/server/db/schema";
-import { fetchMessagesOffCooldown, getDbUser, postMessage } from "@/server/queries";
+import {
+  fetchMessagesOffCooldown,
+  getDbUser,
+  postMessage,
+} from "@/server/queries";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -25,13 +29,17 @@ export async function addMessage(formData: FormData) {
       messageId: sentMessage[0].id,
     })
     .execute();
-  redirect("/");
+  // redirect("/");
+  revalidatePath("/");
+  revalidatePath("/chat");
 }
 
 export async function fetchMessagesOffCD() {
   const currUserId = await getUserId();
   await fetchMessagesOffCooldown(currUserId);
-  redirect("/");
+  // redirect("/");
+  revalidatePath("/");
+  revalidatePath("/chat");
 }
 
 export async function logOut() {

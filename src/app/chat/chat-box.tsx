@@ -4,7 +4,7 @@ import ChatInput from "./chat-input";
 import ChatMsgs from "./chat-msgs";
 import { fetchFetchedMessages } from "@/server/queries";
 interface ChatBoxProps {
-  userId: number;
+  messages: Message[];
 }
 
 interface Message {
@@ -18,8 +18,7 @@ interface Message {
   };
 }
 
-export default async function ChatBox({ userId }: ChatBoxProps) {
-  const messages: Message[] = await fetchFetchedMessages(userId);
+export default async function ChatBox({ messages }: ChatBoxProps) {
 
   return (
     <div className="flex w-full flex-col">

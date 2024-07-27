@@ -1,5 +1,3 @@
-"use client";
-
 import { fetchMessagesOffCD } from "@/actions/actions";
 import { useEffect, useState } from "react";
 import { formatDate, formatTime } from "@/lib/dateUtils";
@@ -27,23 +25,18 @@ interface Message {
 }
 
 export default function FetchBox({ fetchProps }: FetchProps) {
-  const [messages, setMessages] = useState<Message[]>(
-    fetchProps.importMessages
-  );
-  const [tokens, setTokens] = useState<number>(fetchProps.fetchesLeft);
-
   const calculateCooldown = (messageTime: Date) => {
     const now = new Date();
     const cooldownEnd = new Date(messageTime);
     cooldownEnd.setHours(cooldownEnd.getHours() + 1);
     const diff = cooldownEnd.getTime() - now.getTime();
-    const minutes = Math.ceil(diff / 1000 / 60); // Convert milliseconds to minutes and round up
+    const minutes = Math.ceil(diff / 1000 / 60);
     return minutes;
   };
 
   return (
     <div className="flex flex-col items-center">
-      <div>Fetches left: {tokens}</div>
+      <div>Fetches left: {fetchProps.fetchesLeft}</div>
       <form action={fetchMessagesOffCD}>
         <button type="submit" className="btn btn-lg m-4">
           Fetch Messages Off Cooldown
@@ -52,7 +45,7 @@ export default function FetchBox({ fetchProps }: FetchProps) {
       <div className="card bg-base-300 rounded-box p-4 text-center">
         <div>Unfetched messages:</div>
         <div>
-          {messages.map((msg) => (
+          {fetchProps.importMessages.map((msg) => (
             <div key={msg.id} className="card bg-neutral p-1 m-1">
               <p>
                 <strong>Message from {msg.author.name}</strong>

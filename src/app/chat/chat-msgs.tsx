@@ -1,5 +1,3 @@
-"use client";
-import { useState } from "react";
 import { formatDate, formatTime } from "@/lib/dateUtils";
 
 interface ChatMsgsProps {
@@ -18,11 +16,10 @@ interface Message {
 }
 
 export default function ChatMsgs({ messages }: ChatMsgsProps) {
-  const [currMessages, setMessages] = useState<Message[]>(messages);
 
   return (
     <div className="card bg-base-300 rounded-box p-4">
-      {currMessages.map((message) => (
+      {messages.map((message) => (
         <div key={message.id} className="chat chat-start">
           <div className="chat-header">
             <span className="username">{message.author.name}</span>
