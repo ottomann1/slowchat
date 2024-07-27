@@ -1,7 +1,9 @@
-import postgres from "postgres";
-import { drizzle } from "drizzle-orm/postgres-js";
+import { pgTable, serial, text, varchar } from "drizzle-orm/pg-core";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
+import * as schema from "./schema";
 
-const client = postgres({
+const pool = new Pool({
   user: "postgres",
   host: "localhost",
   database: "finale",
@@ -9,6 +11,6 @@ const client = postgres({
   port: 5432,
 });
 
-const db = drizzle(client);
+const db = drizzle(pool, { schema });
 
-export { client, db };
+export { pool, db };

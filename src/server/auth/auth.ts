@@ -62,5 +62,5 @@ export async function getUserId(): Promise<number> {
 }
 
 export async function logout() {
-  // localStorage.removeItem("username");
+  cookies().delete("slowuser");
 }

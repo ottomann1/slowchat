@@ -1,8 +1,10 @@
 "use server";
-import { getLoggedIn, getUserId } from "@/server/auth/auth";
+import { getLoggedIn, getUserId, logout } from "@/server/auth/auth";
 import { db } from "@/server/db";
-import { message } from "@/server/db/schema";
-import { postMessage } from "@/server/queries";
+import { fetchedMessages, message } from "@/server/db/schema";
+import { fetchMessagesOffCooldown, postMessage } from "@/server/queries";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 type NewMessage = typeof message.$inferInsert;
 export async function addMessage(formData: FormData) {
@@ -16,5 +18,23 @@ export async function addMessage(formData: FormData) {
     time: new Date(),
   };
   const sentMessage = await db.insert(message).values(newMsg).returning();
-  return sentMessage;
+  await db
+    .insert(fetchedMessages)
+    .values({
+      userId: Number(currUserId),
+      messageId: sentMessage[0].id,
+    })
+    .execute();
+  redirect("/");
+}
+
+export async function fetchMessagesOffCD() {
+  const currUserId = await getUserId();
+  await fetchMessagesOffCooldown(currUserId);
+  redirect("/");
+}
+
+export async function logOut() {
+  await logout();
+  redirect("/");
 }
