@@ -1,8 +1,8 @@
 import { isLoggedIn } from "@/server/auth/auth";
-import { is } from "drizzle-orm";
 import { redirect } from "next/navigation";
 
 export default async function Home() {
+  //This page checks if you are logged in. If you aren't, it sends you to the login. If you are then it sends you to the chat
   const loggedIn = await isLoggedIn();
   if (!loggedIn) {
     return redirect("/login");

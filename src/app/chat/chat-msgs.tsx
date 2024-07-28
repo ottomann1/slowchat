@@ -1,37 +1,33 @@
 import { formatDate, formatTime } from "@/lib/dateUtils";
+import { MessageWAuthor, User } from "@/lib/types";
 
 interface ChatMsgsProps {
-  messages: Message[];
+  messages: MessageWAuthor[];
+  currUser: User;
 }
 
-interface Message {
-  id: number;
-  userId: number;
-  content: string;
-  time: Date;
-  author: {
-    id: number;
-    name: string;
-  };
-}
-
-export default function ChatMsgs({ messages }: ChatMsgsProps) {
-
+export default function ChatMsgs({ messages, currUser }: ChatMsgsProps) {
+  //This is chatmessages, it prints messages that are fetched.
   return (
-    <div className="card bg-base-300 rounded-box p-4">
+    <section className="card bg-base-300 rounded-box p-4">
       {messages.map((message) => (
-        <div key={message.id} className="chat chat-start">
-          <div className="chat-header">
+        <article
+          key={message.id}
+          className={`chat ${
+            message.author.id === currUser.id ? "chat-end" : "chat-start"
+          }`}
+        >
+          <header className="chat-header">
             <span className="username">{message.author.name}</span>
             <span className="text-xs opacity-50 ml-1">
               {"- "}
               {formatDate(new Date(message.time))} at{" "}
               {formatTime(new Date(message.time))}
             </span>
-          </div>
-          <div className="chat-bubble">{message.content}</div>
-        </div>
+          </header>
+          <p className="chat-bubble">{message.content}</p>
+        </article>
       ))}
-    </div>
+    </section>
   );
 }

@@ -2,9 +2,10 @@
 import { LoginForm } from "./login-form";
 
 export default function login() {
+  //This is the login page, pretty self-explanatory
   return (
-    <div>
+    <main>
       <LoginForm />
-    </div>
+    </main>
   );
 }

@@ -1,4 +1,4 @@
-import { format, isToday, isYesterday, subDays, isThisWeek } from "date-fns";
+import { format, isToday, isYesterday, isThisWeek } from "date-fns";
 
 export const formatDate = (date: Date): string => {
   const parsedDate = new Date(date);
@@ -7,12 +7,12 @@ export const formatDate = (date: Date): string => {
   } else if (isYesterday(parsedDate)) {
     return "Yesterday";
   } else if (isThisWeek(parsedDate)) {
-    return format(parsedDate, "EEEE"); // Day of the week
+    return format(parsedDate, "EEEE");
   } else {
-    return format(parsedDate, "dd/MM/yyyy"); // European date format
+    return format(parsedDate, "dd/MM/yyyy");
   }
 };
 
 export const formatTime = (date: Date): string => {
-  return format(new Date(date), "HH:mm"); // European time format without seconds
+  return format(new Date(date), "HH:mm");
 };

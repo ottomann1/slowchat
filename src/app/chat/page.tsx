@@ -1,41 +1,42 @@
 import {
   fetchAllUnfetchedMessages,
   fetchFetchedMessages,
-  getMessages,
   getTokensLeft,
 } from "@/server/queries";
 import ChatBox from "./chat-box";
-import { message, user } from "@/server/db/schema";
 import { getUser } from "@/server/auth/auth";
 import FetchBox from "./fetch-box";
 import Link from "next/link";
 import { logOut } from "@/actions/actions";
-import { formatDate, formatTime } from "@/lib/dateUtils";
-type Message = typeof message.$inferSelect;
-type User = typeof user.$inferSelect;
+import { User } from "@/lib/types";
 
 export default async function ChatPage() {
+  //This is the chat-page! As you can see it collects plenty of data and then prints it in appropriate sections
   const currUser: User = await getUser();
   const fetchesLeft = await getTokensLeft(currUser.id);
-  const importMessages = await fetchAllUnfetchedMessages(currUser.id);
-  const displayMessages = await fetchFetchedMessages(currUser.id);
+  const importMessages = await fetchAllUnfetchedMessages(currUser.id, Date.now());
+  const displayMessages = await fetchFetchedMessages(currUser.id, Date.now());
   const fetchProps = { importMessages, fetchesLeft };
   console.log("tokens left ", fetchesLeft);
   console.log("fetchporps", fetchProps);
 
   return (
-    <div>
-      <div className="flex justify-between p-4">
+    <main>
+      <header className="flex justify-between p-4">
         <form action={logOut}>
-          <button className="btn" type="submit"> Logout </button>
+          <button className="btn" type="submit">
+            Logout
+          </button>
         </form>
         <Link href="/statistics">
           <button className="btn">Statistics</button>
         </Link>
+      </header>
+      <div className="container mx-auto p-4">
+        <ChatBox messages={displayMessages} currUser={currUser} />
+        <div className="divider" />
+        <FetchBox fetchProps={fetchProps} />
       </div>
-      <ChatBox messages={displayMessages} />
-      <div className="divider"></div>
-      <FetchBox fetchProps={fetchProps} />
-    </div>
+    </main>
   );
 }

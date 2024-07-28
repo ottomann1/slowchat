@@ -1,30 +1,18 @@
-import { addMessage, logOut } from "@/actions/actions";
-import { message } from "@/server/db/schema";
 import ChatInput from "./chat-input";
 import ChatMsgs from "./chat-msgs";
-import { fetchFetchedMessages } from "@/server/queries";
+import { MessageWAuthor, User } from "@/lib/types";
 interface ChatBoxProps {
-  messages: Message[];
+  messages: MessageWAuthor[];
+  currUser: User;
 }
 
-interface Message {
-  id: number;
-  userId: number;
-  content: string;
-  time: Date;
-  author: {
-    id: number;
-    name: string;
-  };
-}
-
-export default async function ChatBox({ messages }: ChatBoxProps) {
-
+export default async function ChatBox({ messages, currUser }: ChatBoxProps) {
+  //This chatbox is just something to make my code a bit more separated and easier to read
   return (
-    <div className="flex w-full flex-col">
-      <ChatMsgs messages={messages} />
-      <div className="divider"></div>
+    <section className="flex w-full flex-col">
+      <ChatMsgs messages={messages} currUser={currUser} />
+      <div className="divider" />
       <ChatInput />
-    </div>
+    </section>
   );
 }

@@ -54,5 +54,5 @@ export const fetchedMessagesRelations = relations(
       fields: [fetchedMessages.messageId],
       references: [message.id],
     }),
-  }),
+  })
 );

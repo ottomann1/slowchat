@@ -1,11 +1,4 @@
-interface Statistics {
-  userId: number;
-  username: string;
-  totalMessages: number;
-  totalFetches: number;
-  totalAverageMessagesPerFetch: number;
-  totalFetchesNoCooldown: number;
-}
+import { Statistics } from "@/lib/types";
 
 interface StatisticProps {
   stats: Statistics[];
@@ -18,17 +11,21 @@ export default function Accordion({ stats }: StatisticProps) {
         {stats.map((stat) => (
           <div key={stat.userId}>
             <div className="collapse bg-base-200">
-              <input type="radio" name="my-accordion-1" defaultChecked />
+              <input type="radio" name="accordio" />
               <div className="collapse-title text-xl font-medium">
                 {stat.username}
               </div>
               <div className="collapse-content">
-            <ul>
-              <li>Total Messages: {stat.totalMessages}</li>
-              <li>Total Fetches: {stat.totalFetches}</li>
-              <li>Average Messages per Fetch: {stat.totalAverageMessagesPerFetch.toFixed(2)}</li>
-              <li>Total Messages Fetched: {stat.totalFetchesNoCooldown}</li>
-            </ul>              </div>
+                <ul>
+                  <li>Total Messages: {stat.totalMessages}</li>
+                  <li>Total Fetches: {stat.totalFetches}</li>
+                  <li>
+                    Average Messages per Fetch:{" "}
+                    {stat.totalAverageMessagesPerFetch.toFixed(2)}
+                  </li>
+                  <li>Total Messages Fetched: {stat.totalFetchesNoCooldown}</li>
+                </ul>{" "}
+              </div>
             </div>
           </div>
         ))}

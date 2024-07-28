@@ -4,9 +4,8 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { user } from "../db/schema";
 import { db } from "../db";
-import { getDbUser, postUser } from "../queries";
+import { findUserByName, postUser } from "../queries";
 
-type NewUser = typeof user.$inferSelect;
 type getUser = typeof user.$inferSelect;
 export const auth = async (username: string, password: string) => {
   const sharedPassword = process.env.SHARED_PASSWORD;
@@ -21,17 +20,15 @@ export const auth = async (username: string, password: string) => {
   throw new Error("Invalid password");
 };
 
-export async function checkAndPostUser(username: string): Promise<void> {
+export async function checkAndPostUser(username: string) {
   try {
-    // Check if the user exists in the database
-    const userId = await getDbUser(username);
-    // If userId is found, do nothing
+    //Check for user
+    const userId = await findUserByName(username);
     if (userId) {
       console.log(`User ${username} already exists with ID ${userId.id}`);
       return;
     }
   } catch (error) {
-    // If an error occurs during the user check, assume the user does not exist
     console.error(`Error checking user ${username}:`, error);
   }
 
@@ -58,13 +55,13 @@ export async function getLoggedIn(): Promise<string> {
 
 export async function getUserId(): Promise<number> {
   const user = await getLoggedIn();
-  const currUser = await getDbUser(user);
+  const currUser = await findUserByName(user);
   return currUser.id;
 }
 
 export async function getUser(): Promise<getUser> {
   const user = await getLoggedIn();
-  const currUser = await getDbUser(user);
+  const currUser = await findUserByName(user);
   return currUser;
 }
 

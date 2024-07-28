@@ -1,7 +1,10 @@
-import "server-only";
+"use server"
 import { message, user, tokens, fetchedMessages } from "./db/schema";
 import { db } from "./db";
 import { count, eq, lt, inArray, ne, notInArray, and } from "drizzle-orm";
+import { Statistics } from "@/lib/types";
+import { revalidatePath } from "next/cache";
+import { getUserId } from "./auth/auth";
 
 type getMessage = typeof message.$inferSelect;
 type NewMessage = typeof message.$inferInsert;
@@ -9,30 +12,28 @@ type NewUser = typeof user.$inferInsert;
 type getUser = typeof user.$inferSelect;
 type getToken = typeof tokens.$inferSelect;
 
-export async function getMessages(): Promise<getMessage[]> {
-  const messages = await db.select().from(message);
-  return messages;
+export async function findUserById(userId: number): Promise<getUser> {
+  const foundUser = await db.query.user.findFirst({
+    where: eq(user.id, userId),
+  });
+  if (!foundUser) throw new Error("User not found");
+  return foundUser;
 }
 
-export async function postMessage(newmsg: NewMessage) {
-  newmsg.time = new Date();
-  const sentMessage = await db.insert(message).values(newmsg).returning();
-  return sentMessage;
-}
-
-export async function getDbUser(userName: string): Promise<getUser> {
-  console.log(userName);
-
-  const gottenUser = await db.query.user.findFirst({
+export async function findUserByName(userName: string): Promise<getUser> {
+  const foundUser = await db.query.user.findFirst({
     where: eq(user.name, userName),
   });
-  if (!gottenUser) throw new Error("User not found");
-  return gottenUser;
+  if (!foundUser) throw new Error("User not found");
+  return foundUser;
 }
 
-export async function getUsers() {
-  const users = await db.select().from(user);
-  return users;
+export async function findTokensByUserId(userId: number): Promise<getToken> {
+  const foundTokens = await db.query.tokens.findFirst({
+    where: eq(tokens.userId, userId),
+  });
+  if (!foundTokens) throw new Error("Tokens not found");
+  return foundTokens;
 }
 
 export async function postUser(username: string) {
@@ -52,41 +53,30 @@ export async function createFetchTokens(userId: number) {
 }
 
 export async function incrementUserFetches(userId: number) {
-  const currUser = await db.query.user.findFirst({
-    where: eq(user.id, userId),
-  });
-  if (!currUser) throw new Error("User can't be found");
+  const currUser = await findUserById(userId);
   await db
     .update(user)
-    .set({
-      totalFetches: currUser.totalFetches + 1,
-    })
+    .set({ totalFetches: currUser.totalFetches + 1 })
     .where(eq(user.id, userId))
     .execute();
 }
 
-export async function fetchMessagesOffCooldown(userId: number): Promise<any[]> {
-  const now = new Date();
-  const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
-  const messages = await db.query.message.findMany({
-    with: {
-      author: true,
-    },
-  });
+export async function fetchMessagesOffCooldown(userId: number, currDate:number): Promise<any[]> {
+  const oneHourAgo = new Date(currDate - 60 * 60 * 1000);
+  const messages = await db.query.message.findMany({ with: { author: true } });
 
   const messagesOffCooldown = messages.filter((msg) => msg.time <= oneHourAgo);
+  if (!messagesOffCooldown.length) throw new Error("No fetchable messages");
 
   const fetchedMessageRecords = messagesOffCooldown.map((msg) => ({
     userId,
     messageId: msg.id,
   }));
-  console.log(fetchedMessageRecords);
-  if (!fetchedMessageRecords[0]) throw new Error("No fetchable messages");
-
   await db.insert(fetchedMessages).values(fetchedMessageRecords).execute();
 
-  decrementFetchToken(userId);
-  incrementUserFetches(userId);
+  await decrementFetchToken(userId);
+  await incrementUserFetches(userId);
+
   return messagesOffCooldown.map((msg) => ({
     id: msg.id,
     content: msg.content,
@@ -95,27 +85,12 @@ export async function fetchMessagesOffCooldown(userId: number): Promise<any[]> {
   }));
 }
 
-export async function getUserTokens(userId: number): Promise<getToken> {
-  const userTokens = await db.query.tokens.findFirst({
-    where: eq(tokens.userId, userId),
-  });
-  if (!userTokens) throw new Error("cant find tokens");
-  return userTokens;
-}
-
 export async function getTokensLeft(userId: number): Promise<number> {
-  const userTokens = await db.query.tokens.findFirst({
-    where: eq(tokens.userId, userId),
-  });
-
-  if (!userTokens) throw new Error("Can't find tokens for the user");
-
-  const totalTokensLeft = userTokens.dailyTokens + userTokens.weeklyTokens;
-  return totalTokensLeft;
+  const userTokens = await findTokensByUserId(userId);
+  return userTokens.dailyTokens + userTokens.weeklyTokens;
 }
 
-export async function fetchFetchedMessages(userId: number): Promise<any[]> {
-  // Get IDs of messages already fetched by the user
+export async function fetchFetchedMessages(userId: number, currDate:number): Promise<any[]> {
   const fetchedMessageIdsResult = await db
     .select()
     .from(fetchedMessages)
@@ -125,12 +100,8 @@ export async function fetchFetchedMessages(userId: number): Promise<any[]> {
   const fetchedIds = fetchedMessageIdsResult
     .map((msg) => msg.messageId)
     .filter((id) => id !== null);
-
-  // Fetch messages with the fetched IDs
   const messages = await db.query.message.findMany({
-    with: {
-      author: true,
-    },
+    with: { author: true },
     where: inArray(message.id, fetchedIds),
   });
 
@@ -139,30 +110,25 @@ export async function fetchFetchedMessages(userId: number): Promise<any[]> {
     content: msg.content,
     time: msg.time,
     author: msg.author,
-    onCooldown: msg.time > new Date(new Date().getTime() - 60 * 60 * 1000),
+    onCooldown: msg.time > new Date(currDate - 60 * 60 * 1000),
   }));
 }
 
-export async function fetchAllUnfetchedMessages(userId: number) {
-  const now = new Date();
-  const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+export async function fetchAllUnfetchedMessages(userId: number, currDate:number) {
+  const oneHourAgo = new Date(currDate - 60 * 60 * 1000);
 
-  const fetchedMessage = await db
+  const fetchedMessageIds = await db
     .select()
     .from(fetchedMessages)
-    .where(eq(fetchedMessages.userId, userId));
+    .where(eq(fetchedMessages.userId, userId))
+    .execute();
+  const fetchedIds = fetchedMessageIds.map((msg) => msg.messageId);
 
-  const fetchedIds = fetchedMessage.map((msg) => msg.messageId);
-  if (!fetchedIds) throw new Error("fetched ids is null");
-
-  const messages = await db.query.message.findMany({
-    with: {
-      author: true,
-    },
-  });
+  const messages = await db.query.message.findMany({ with: { author: true } });
   const messagesNotFetched = messages.filter(
-    (msg) => !fetchedIds.includes(msg.id),
+    (msg) => !fetchedIds.includes(msg.id)
   );
+
   return messagesNotFetched.map((msg) => ({
     id: msg.id,
     content: msg.content,
@@ -173,37 +139,26 @@ export async function fetchAllUnfetchedMessages(userId: number) {
 }
 
 export async function decrementFetchToken(userId: number) {
-  const userTokens = await getUserTokens(userId);
+  const userTokens = await findTokensByUserId(userId);
 
   if (userTokens.dailyTokens > 0) {
     await db
       .update(tokens)
-      .set({
-        dailyTokens: userTokens.dailyTokens - 1,
-      })
-      .where(eq(tokens.userId, userId));
+      .set({ dailyTokens: userTokens.dailyTokens - 1 })
+      .where(eq(tokens.userId, userId))
+      .execute();
   } else if (userTokens.weeklyTokens > 0) {
     await db
       .update(tokens)
-      .set({
-        weeklyTokens: userTokens.weeklyTokens - 1,
-      })
-      .where(eq(tokens.userId, userId));
+      .set({ weeklyTokens: userTokens.weeklyTokens - 1 })
+      .where(eq(tokens.userId, userId))
+      .execute();
   } else {
     throw new Error("No fetch tokens left");
   }
 }
 
-interface Statistics {
-  userId: number;
-  username: string;
-  totalMessages: number;
-  totalFetches: number;
-  totalAverageMessagesPerFetch: number;
-  totalFetchesNoCooldown: number;
-}
-
-export async function getStatistics(): Promise<Statistics[]> {
+export async function getStatistics(currDate: number): Promise<Statistics[]> {
   const userMessagesCount = await db
     .select({
       userId: user.id,
@@ -215,10 +170,7 @@ export async function getStatistics(): Promise<Statistics[]> {
     .groupBy(user.id);
 
   const userFetchesCount = await db
-    .select({
-      userId: user.id,
-      totalFetches: user.totalFetches,
-    })
+    .select({ userId: user.id, totalFetches: user.totalFetches })
     .from(user);
 
   const userFetchesNoCooldownCount = await db
@@ -230,42 +182,68 @@ export async function getStatistics(): Promise<Statistics[]> {
     .leftJoin(message, eq(fetchedMessages.messageId, message.id))
     .where(
       and(
-        lt(message.time, new Date(new Date().getTime() - 60 * 60 * 1000)),
-        ne(message.userId, fetchedMessages.userId),
-      ),
+        lt(message.time, new Date(currDate - 60 * 60 * 1000)),
+        ne(message.userId, fetchedMessages.userId)
+      )
     )
     .groupBy(fetchedMessages.userId);
 
-    const userStatistics: Statistics[] = userMessagesCount.map((user) => {
-      const usersFetchCount = userFetchesCount.find((fetchCount) => fetchCount.userId === user.userId);
-      const totalFetches = usersFetchCount?.totalFetches || 0;
-  
-      const usersMessagesFetchedCount = userFetchesNoCooldownCount.find((messagesFetched) => messagesFetched.userId === user.userId);
-      const totalFetchesNoCooldown = usersMessagesFetchedCount?.totalFetchesNoCooldown || 0;
-  
-      const totalAverageMessagesPerFetch = averageMessagesPerFetch(user.totalMessages, totalFetches);
-  
-      return {
-        userId: user.userId,
-        username: user.username,
-        totalMessages: user.totalMessages,
-        totalFetches: totalFetches,
-        totalAverageMessagesPerFetch: totalAverageMessagesPerFetch,
-        totalFetchesNoCooldown: totalFetchesNoCooldown,
-      };
-    });
+  const userStatisticsPromises = userMessagesCount.map(async (user) => {
+    const usersFetchCount = userFetchesCount.find(
+      (fetchCount) => fetchCount.userId === user.userId
+    );
+    const totalFetches = usersFetchCount?.totalFetches || 0;
 
-    userStatistics.sort((a, b) => a.username.localeCompare(b.username));
+    const usersMessagesFetchedCount = userFetchesNoCooldownCount.find(
+      (messagesFetched) => messagesFetched.userId === user.userId
+    );
+    const totalFetchesNoCooldown =
+      usersMessagesFetchedCount?.totalFetchesNoCooldown || 0;
 
-    return userStatistics;
-  }
+    const totalAverageMessagesPerFetch = await averageMessagesPerFetch(
+      user.totalMessages,
+      totalFetches
+    );
 
+    return {
+      userId: user.userId,
+      username: user.username,
+      totalMessages: user.totalMessages,
+      totalFetches: totalFetches,
+      totalAverageMessagesPerFetch: totalAverageMessagesPerFetch,
+      totalFetchesNoCooldown: totalFetchesNoCooldown,
+    };
+  });
 
-export function averageMessagesPerFetch(usersFetchCount: number, usersMessagesFetchedCount: number) {
+  const userStatistics = await Promise.all(userStatisticsPromises);
+
+  userStatistics.sort((a, b) => a.username.localeCompare(b.username));
+  return userStatistics;
+}
+
+export async function averageMessagesPerFetch(usersFetchCount: number, usersMessagesFetchedCount: number) {
   let usersAverageMessagesPerFetch = 0;
   if (usersFetchCount > 0 && usersMessagesFetchedCount > 0) {
     usersAverageMessagesPerFetch = usersMessagesFetchedCount / usersFetchCount;
   }
   return usersAverageMessagesPerFetch;
+}
+
+export async function postMessage(inputMsg: string, currDate:number) {
+  const currUserId = await getUserId();
+  const newMsg: NewMessage = {
+    userId: Number(currUserId),
+    content: inputMsg,
+    time: new Date(currDate),
+  };
+
+  const sentMessage = await db.insert(message).values(newMsg).returning();
+  await db
+    .insert(fetchedMessages)
+    .values({
+      userId: Number(currUserId),
+      messageId: sentMessage[0].id,
+    })
+    .execute();
 }
 
