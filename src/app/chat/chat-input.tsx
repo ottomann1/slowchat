@@ -25,12 +25,12 @@ export default function ChatInput() {
   }
 
   return (
-    <section className="card bg-base-300 rounded-box grid h-20 place-items-center p-4">
-      <div className="join">
+    <section className="card bg-base-300 rounded-box grid place-items-center p-4 h-auto">
+      <div className="flex flex-col sm:flex-row w-full items-center">
         <input
           type="text"
           placeholder="Enter your message here..."
-          className="input input-bordered w-full max-w-xs"
+          className="input input-bordered flex-grow w-full sm:w-auto mb-2 sm:mb-0 sm:mr-1"
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           onKeyPress={(e) => {
@@ -39,11 +39,12 @@ export default function ChatInput() {
             }
           }}
         />
-        <button className="btn" onClick={sendMessage}>
+        <button className="btn w-full sm:w-auto" onClick={sendMessage}>
           Send
         </button>
       </div>
       {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
     </section>
   );
+  
 }
