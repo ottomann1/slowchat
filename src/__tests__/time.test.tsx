@@ -13,12 +13,9 @@ describe("Cooldown", async () => {
     await resetDatabase();
   });
   it("Should be able to fetch a message after one hour", async () => {
-    console.log("Tests need to be done on empty tables");
-    // await resetDatabase();
     await postUser("Test User");
     await postUser("Test User 2");
 
-    const originalDateNow = Date.now;
     Date.now = vi.fn(() => new Date("2023-01-01T12:00:00Z").getTime());
     await postMessage("testmsg", Date.now(), 1);
 
@@ -34,7 +31,6 @@ describe("Cooldown", async () => {
     await postUser("Test User");
     await postUser("Test User 2");
 
-    const originalDateNow = Date.now;
     Date.now = vi.fn(() => new Date("2023-01-01T12:00:00Z").getTime());
     await postMessage("testmsg", Date.now(), 1);
 

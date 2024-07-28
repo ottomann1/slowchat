@@ -1,22 +1,20 @@
 "use server";
-import { getUserId, logout } from "../server/auth/auth";
-import { message } from "../server/db/schema";
+import { getUser, logout } from "../server/auth/auth";
 import { fetchMessagesOffCooldown, postMessage } from "../server/queries";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-type NewMessage = typeof message.$inferInsert;
 export async function addMessage(inputMsg: string) {
-  const currUserId = await getUserId();
-  await postMessage(inputMsg, Date.now(), currUserId);
+  const currUser = await getUser();
+  await postMessage(inputMsg, Date.now(), currUser.id);
 
   revalidatePath("/");
   revalidatePath("/chat");
 }
 
 export async function fetchMessagesOffCD() {
-  const currUserId = await getUserId();
-  await fetchMessagesOffCooldown(currUserId, Date.now());
+  const currUser = await getUser();
+  await fetchMessagesOffCooldown(currUser.id, Date.now());
   revalidatePath("/");
   revalidatePath("/chat");
 }

@@ -3,7 +3,6 @@ import "dotenv/config";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { user } from "../db/schema";
-import { db } from "../db";
 import { findUserByName, postUser } from "../queries";
 
 type getUser = typeof user.$inferSelect;
@@ -41,26 +40,17 @@ export async function checkAndPostUser(username: string) {
   }
 }
 
-export async function isLoggedIn(): Promise<boolean> {
+export async function getLoggedIn(): Promise<string|null> {
   const user = cookies().get("slowuser")?.value;
-  if (!user) return false;
-  else return true;
-}
-
-export async function getLoggedIn(): Promise<string> {
-  const user = cookies().get("slowuser")?.value;
-  if (!user) return "";
+  if (!user) return null;
   return user;
-}
-
-export async function getUserId(): Promise<number> {
-  const user = await getLoggedIn();
-  const currUser = await findUserByName(user);
-  return currUser.id;
 }
 
 export async function getUser(): Promise<getUser> {
   const user = await getLoggedIn();
+  if(!user){
+    throw new Error("Not logged in")
+  }
   const currUser = await findUserByName(user);
   return currUser;
 }
