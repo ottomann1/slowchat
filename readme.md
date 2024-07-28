@@ -62,6 +62,8 @@ It just felt more natural doing refactoring before finishing up the styling and 
 
 I ended up using DaisyUI for my components, I thought they looked pretty good and fit the style I had in mind. 
 Along with them I went with a dark color scheme because I thought it fit the chill vibes of the app.
+But probably I regret the theme a bit, think it would have been better if there were more fun colors.
+That's something I could keep working on some other time though.
 For my font family I chose Helvetica, Roboto, sans-serif. I think this font family looks cool and Helvetica is probably my favorite font.
 Not that I'm very into fonts but still.
 
