@@ -2,6 +2,7 @@
 import { addMessage } from "@/actions/actions";
 import { useState } from "react";
 import { z } from "zod";
+import Error from "../_components/error"
 
 const messageSchema = z.string().min(1, { message: "Message cannot be empty" });
 
@@ -43,7 +44,11 @@ export default function ChatInput() {
           Send
         </button>
       </div>
-      {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+      {error && (
+            <div className="w-half m-4" >
+              <Error message={error} onClose={() => setError(null)} />
+            </div>
+          )}
     </section>
   );
   

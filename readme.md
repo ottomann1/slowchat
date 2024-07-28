@@ -2,7 +2,7 @@
 
 Welcome to this amazing piece of software. A group messaging app where messages go on a cooldown for an hour before you can fetch them and fetching is limited.
 
-To run this app, run docker-compose up first then run npm run dev
+To run this app, run docker-compose up first, then set DATABASE_URL and SHARED_PASSWORD variables in .env and then run npm run dev
 
 ## Notes
 
