@@ -20,8 +20,6 @@ export default async function ChatPage() {
   );
   const displayMessages = await fetchFetchedMessages(currUser.id, Date.now());
   const fetchProps = { importMessages, fetchesLeft };
-  console.log("tokens left ", fetchesLeft);
-  console.log("fetchporps", fetchProps);
 
   return (
     <main>
