@@ -318,9 +318,9 @@ export async function resetDatabase() {
   await db.execute(sql`DROP TABLE IF EXISTS fetched_messages`);
   await db.execute(sql`DROP TABLE IF EXISTS tokens`);
   await db.execute(sql`DROP TABLE IF EXISTS messages`);
-  await db.execute(sql`DROP TABLE IF EXISTS users`);
   await db.execute(sql`DROP TABLE IF EXISTS token_reset`);
-
+  await db.execute(sql`DROP TABLE IF EXISTS users`);
+  
   await db.execute(sql`
     CREATE TABLE users (
       id SERIAL PRIMARY KEY,
