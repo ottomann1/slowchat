@@ -9,12 +9,8 @@ import {
 import { db } from "./db";
 import { count, eq, lt, inArray, ne, and, sql } from "drizzle-orm";
 import { Statistics } from "@/lib/types";
-import * as schema from "./db/schema";
-import { cookies } from "next/headers";
 
-type getMessage = typeof message.$inferSelect;
 type NewMessage = typeof message.$inferInsert;
-type NewUser = typeof user.$inferInsert;
 type getUser = typeof user.$inferSelect;
 type getToken = typeof tokens.$inferSelect;
 
@@ -32,7 +28,9 @@ export async function findUserByName(userName: string): Promise<getUser> {
     where: eq(user.name, userName),
   });
   if (!foundUser) {
-    throw new Error("User not found. Most likely the user you have saved in cookies no longer exists in the database.");
+    throw new Error(
+      "User not found. Most likely the user you have saved in cookies no longer exists in the database."
+    );
   }
   return foundUser;
 }

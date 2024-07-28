@@ -72,10 +72,7 @@ export function LoginForm() {
           </div>
           {error && <p className="mb-4 text-sm text-red-500">{error}</p>}
           <div className="flex flex-col items-center justify-center">
-            <button
-              type="submit"
-              className="btn w-full max-w-xs"
-            >
+            <button type="submit" className="btn w-full max-w-xs">
               Login
             </button>
           </div>
