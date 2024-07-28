@@ -29,7 +29,10 @@ export async function findUserByName(userName: string): Promise<getUser> {
   });
   if (!foundUser) {
     throw new Error(
-      "User not found. Most likely the user you have saved in cookies no longer exists in the database."
+      `User not found. Most likely the user you have saved in cookies 
+      no longer exists in the database. I was going to fix this by redirecting 
+      to the main page but for some reason it wouldnt let me redirect from a try catch. 
+      Couldn't think of a better way to do it in time so here you go.`
     );
   }
   return foundUser;
@@ -320,7 +323,7 @@ export async function resetDatabase() {
   await db.execute(sql`DROP TABLE IF EXISTS messages`);
   await db.execute(sql`DROP TABLE IF EXISTS token_reset`);
   await db.execute(sql`DROP TABLE IF EXISTS users`);
-  
+
   await db.execute(sql`
     CREATE TABLE users (
       id SERIAL PRIMARY KEY,

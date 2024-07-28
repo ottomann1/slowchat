@@ -3,7 +3,7 @@ import "./globals.css";
 import Head from "next/head";
 
 export const metadata: Metadata = {
-  title: "Slowpoke",
+  title: "Slowbro",
   description:
     "The group messaging app designed to be used as little as possible",
 };
