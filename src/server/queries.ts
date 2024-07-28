@@ -236,36 +236,36 @@ export async function getStatistics(): Promise<Statistics[]> {
     )
     .groupBy(fetchedMessages.userId);
 
-  const userStatistics = userMessagesCount.map((userMsg) => {
-    const fetchCount =
-      userFetchesCount.find((ufc) => ufc.userId === userMsg.userId)
-        ?.totalFetches || 0;
-    const fetchNoCooldownCount =
-      userFetchesNoCooldownCount.find((ufnc) => ufnc.userId === userMsg.userId)
-        ?.totalFetchesNoCooldown || 0;
+    const userStatistics: Statistics[] = userMessagesCount.map((user) => {
+      const usersFetchCount = userFetchesCount.find((fetchCount) => fetchCount.userId === user.userId);
+      const totalFetches = usersFetchCount?.totalFetches || 0;
+  
+      const usersMessagesFetchedCount = userFetchesNoCooldownCount.find((messagesFetched) => messagesFetched.userId === user.userId);
+      const totalFetchesNoCooldown = usersMessagesFetchedCount?.totalFetchesNoCooldown || 0;
+  
+      const totalAverageMessagesPerFetch = averageMessagesPerFetch(user.totalMessages, totalFetches);
+  
+      return {
+        userId: user.userId,
+        username: user.username,
+        totalMessages: user.totalMessages,
+        totalFetches: totalFetches,
+        totalAverageMessagesPerFetch: totalAverageMessagesPerFetch,
+        totalFetchesNoCooldown: totalFetchesNoCooldown,
+      };
+    });
 
-    const totalMessages = userMsg.totalMessages;
-    const totalFetches = fetchCount;
-    let totalFetchedMessages = fetchNoCooldownCount;
-    if (totalFetchedMessages < 0) {
-      totalFetchedMessages = 0;
-    }
-    let totalAverageMessagesPerFetch = 0;
-    if (totalFetches > 0 && totalFetchedMessages > 0) {
-      totalAverageMessagesPerFetch = totalFetchedMessages / totalFetches;
-    }
+    userStatistics.sort((a, b) => a.username.localeCompare(b.username));
 
-    return {
-      userId: userMsg.userId,
-      username: userMsg.username,
-      totalMessages,
-      totalFetches,
-      totalAverageMessagesPerFetch,
-      totalFetchesNoCooldown: totalFetchedMessages,
-    };
-  });
+    return userStatistics;
+  }
 
-  userStatistics.sort((a, b) => a.username.localeCompare(b.username));
 
-  return userStatistics;
+export function averageMessagesPerFetch(usersFetchCount: number, usersMessagesFetchedCount: number) {
+  let usersAverageMessagesPerFetch = 0;
+  if (usersFetchCount > 0 && usersMessagesFetchedCount > 0) {
+    usersAverageMessagesPerFetch = usersMessagesFetchedCount / usersFetchCount;
+  }
+  return usersAverageMessagesPerFetch;
 }
+
