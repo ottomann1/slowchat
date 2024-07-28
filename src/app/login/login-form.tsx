@@ -35,7 +35,7 @@ export function LoginForm() {
     <main className="flex flex-col items-center justify-center min-h-screen space-y-4">
       <section className="card bg-base-300 shadow-md w-full max-w-md p-10 rounded-md">
         <header>
-          <h1 className="text-3xl font-bold text-center mb-4">Slowbroß</h1>
+          <h1 className="text-3xl font-bold text-center mb-4">Slowbro</h1>
           <p className="text-m text-center">
             Welcome to the slow group messaging app
           </p>
