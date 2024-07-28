@@ -2,13 +2,13 @@
 import { addMessage } from "@/actions/actions";
 import { useState } from "react";
 import { z } from "zod";
-import Error from "../_components/error"
+import Error from "../_components/error";
 
 const messageSchema = z.string().min(1, { message: "Message cannot be empty" });
 
 export default function ChatInput() {
   const [newMessage, setNewMessage] = useState("");
-  const [error, setError] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   async function sendMessage() {
     try {
@@ -45,11 +45,10 @@ export default function ChatInput() {
         </button>
       </div>
       {error && (
-            <div className="w-half m-4" >
-              <Error message={error} onClose={() => setError(null)} />
-            </div>
-          )}
+        <div className="w-half m-4">
+          <Error message={error} onClose={() => setError(null)} />
+        </div>
+      )}
     </section>
   );
-  
 }

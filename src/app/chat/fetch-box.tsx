@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useState } from "react";
 import { fetchMessagesOffCD } from "@/actions/actions";
@@ -49,10 +49,7 @@ export default function FetchBox({ fetchProps }: FetchProps) {
       </form>
       {error && (
         <div className="w-full max-w-md my-2">
-          <Error
-            message={error}
-            onClose={() => setError(null)}
-          />
+          <Error message={error} onClose={() => setError(null)} />
         </div>
       )}
       <article className="card bg-base-300 rounded-box p-4 text-center w-full">

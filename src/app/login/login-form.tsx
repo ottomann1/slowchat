@@ -70,11 +70,11 @@ export function LoginForm() {
             />
           </div>
           <div className="flex flex-col items-center justify-center">
-          {error && (
-            <div className="w-full max-w-xs mb-4" >
-              <Error message={error} onClose={() => setError(null)} />
-            </div>
-          )}
+            {error && (
+              <div className="w-full max-w-xs mb-4">
+                <Error message={error} onClose={() => setError(null)} />
+              </div>
+            )}
             <button type="submit" className="btn w-full max-w-xs">
               Login
             </button>
