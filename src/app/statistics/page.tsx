@@ -9,7 +9,7 @@ export default async function statistics() {
   return (
     <main>
       <header className="p-4">
-        <Link href="/chat">
+        <Link href="/">
           <button className="btn">Go back</button>
         </Link>
       </header>

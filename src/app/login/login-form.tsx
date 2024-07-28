@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { auth } from "../../server/auth/auth";
 import { z } from "zod";
+import Error from "../_components/error"; // Adjust the import path as necessary
 
 const loginSchema = z.object({
   username: z.string().min(1, { message: "Username required" }),
@@ -11,7 +12,7 @@ const loginSchema = z.object({
 export function LoginForm() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -54,7 +55,6 @@ export function LoginForm() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className="input input-bordered w-full max-w-xs"
-              required
             />
           </div>
           <div className="mb-4 flex flex-col items-center justify-center">
@@ -67,10 +67,13 @@ export function LoginForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="input input-bordered w-full max-w-xs"
-              required
             />
           </div>
-          {error && <p className="mb-4 text-sm text-red-500">{error}</p>}
+          {error && (
+            <div className="w-full max-w-xs mb-4">
+              <Error message={error} onClose={() => setError(null)} />
+            </div>
+          )}
           <div className="flex flex-col items-center justify-center">
             <button type="submit" className="btn w-full max-w-xs">
               Login

@@ -2,6 +2,8 @@
 
 Welcome to this amazing piece of software. A group messaging app where messages go on a cooldown for an hour before you can fetch them and fetching is limited.
 
+To run this app, run docker-compose up first then run npm run dev
+
 ## Notes
 
 I did most of my planning on paper notes along with GitHub Projects, which will be linked [[Here]](https://github.com/orgs/saltsthlm/projects/66/).
