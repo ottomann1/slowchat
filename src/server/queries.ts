@@ -1,10 +1,16 @@
-"use server"
-import { message, user, tokens, fetchedMessages } from "./db/schema";
+"use server";
+import {
+  message,
+  user,
+  tokens,
+  fetchedMessages,
+  tokenReset,
+} from "./db/schema";
 import { db } from "./db";
-import { count, eq, lt, inArray, ne, notInArray, and } from "drizzle-orm";
+import { count, eq, lt, inArray, ne, and, sql } from "drizzle-orm";
 import { Statistics } from "@/lib/types";
-import { revalidatePath } from "next/cache";
-import { getUserId } from "./auth/auth";
+import * as schema from "./db/schema";
+import { cookies } from "next/headers";
 
 type getMessage = typeof message.$inferSelect;
 type NewMessage = typeof message.$inferInsert;
@@ -17,6 +23,7 @@ export async function findUserById(userId: number): Promise<getUser> {
     where: eq(user.id, userId),
   });
   if (!foundUser) throw new Error("User not found");
+
   return foundUser;
 }
 
@@ -24,7 +31,9 @@ export async function findUserByName(userName: string): Promise<getUser> {
   const foundUser = await db.query.user.findFirst({
     where: eq(user.name, userName),
   });
-  if (!foundUser) throw new Error("User not found");
+  if (!foundUser) {
+    throw new Error("User not found. Most likely the user you have saved in cookies no longer exists in the database.");
+  }
   return foundUser;
 }
 
@@ -61,7 +70,10 @@ export async function incrementUserFetches(userId: number) {
     .execute();
 }
 
-export async function fetchMessagesOffCooldown(userId: number, currDate:number): Promise<any[]> {
+export async function fetchMessagesOffCooldown(
+  userId: number,
+  currDate: number
+): Promise<any[]> {
   const oneHourAgo = new Date(currDate - 60 * 60 * 1000);
   const messages = await db.query.message.findMany({ with: { author: true } });
 
@@ -90,7 +102,10 @@ export async function getTokensLeft(userId: number): Promise<number> {
   return userTokens.dailyTokens + userTokens.weeklyTokens;
 }
 
-export async function fetchFetchedMessages(userId: number, currDate:number): Promise<any[]> {
+export async function fetchFetchedMessages(
+  userId: number,
+  currDate: number
+): Promise<any[]> {
   const fetchedMessageIdsResult = await db
     .select()
     .from(fetchedMessages)
@@ -114,7 +129,10 @@ export async function fetchFetchedMessages(userId: number, currDate:number): Pro
   }));
 }
 
-export async function fetchAllUnfetchedMessages(userId: number, currDate:number) {
+export async function fetchAllUnfetchedMessages(
+  userId: number,
+  currDate: number
+) {
   const oneHourAgo = new Date(currDate - 60 * 60 * 1000);
 
   const fetchedMessageIds = await db
@@ -221,7 +239,10 @@ export async function getStatistics(currDate: number): Promise<Statistics[]> {
   return userStatistics;
 }
 
-export async function averageMessagesPerFetch(usersFetchCount: number, usersMessagesFetchedCount: number) {
+export async function averageMessagesPerFetch(
+  usersFetchCount: number,
+  usersMessagesFetchedCount: number
+) {
   let usersAverageMessagesPerFetch = 0;
   if (usersFetchCount > 0 && usersMessagesFetchedCount > 0) {
     usersAverageMessagesPerFetch = usersMessagesFetchedCount / usersFetchCount;
@@ -229,8 +250,11 @@ export async function averageMessagesPerFetch(usersFetchCount: number, usersMess
   return usersAverageMessagesPerFetch;
 }
 
-export async function postMessage(inputMsg: string, currDate:number) {
-  const currUserId = await getUserId();
+export async function postMessage(
+  inputMsg: string,
+  currDate: number,
+  currUserId: number
+) {
   const newMsg: NewMessage = {
     userId: Number(currUserId),
     content: inputMsg,
@@ -247,3 +271,95 @@ export async function postMessage(inputMsg: string, currDate:number) {
     .execute();
 }
 
+export async function checkAndResetTokens(currDate: number) {
+  const now = new Date(currDate);
+  const resetData = await db.query.tokenReset.findFirst();
+
+  if (!resetData) {
+    await db.insert(tokenReset).values({}).execute();
+    return;
+  }
+
+  const lastDailyReset = new Date(resetData.lastDailyReset);
+  const lastWeeklyReset = new Date(resetData.lastWeeklyReset);
+
+  const isDailyResetNeeded = now.getDate() !== lastDailyReset.getDate();
+  const isWeeklyResetNeeded =
+    now.getDay() === 0 && now.getDate() !== lastWeeklyReset.getDate();
+
+  if (isDailyResetNeeded) {
+    await db.execute(sql`
+      UPDATE tokens
+      SET daily_tokens = LEAST(daily_tokens + 1, 1)
+    `);
+
+    await db
+      .update(tokenReset)
+      .set({
+        lastDailyReset: now,
+      })
+      .execute();
+  }
+
+  if (isWeeklyResetNeeded) {
+    await db.execute(sql`
+      UPDATE tokens
+      SET weekly_tokens = LEAST(weekly_tokens + 2, 2)
+    `);
+
+    await db
+      .update(tokenReset)
+      .set({
+        lastWeeklyReset: now,
+      })
+      .execute();
+  }
+}
+
+export async function resetDatabase() {
+  await db.execute(sql`DROP TABLE IF EXISTS fetched_messages`);
+  await db.execute(sql`DROP TABLE IF EXISTS tokens`);
+  await db.execute(sql`DROP TABLE IF EXISTS messages`);
+  await db.execute(sql`DROP TABLE IF EXISTS users`);
+  await db.execute(sql`DROP TABLE IF EXISTS token_reset`);
+
+  await db.execute(sql`
+    CREATE TABLE users (
+      id SERIAL PRIMARY KEY,
+      name TEXT NOT NULL,
+      total_fetches INTEGER DEFAULT 0 NOT NULL
+    );
+  `);
+
+  await db.execute(sql`
+    CREATE TABLE messages (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+      content TEXT NOT NULL,
+      time TIMESTAMP DEFAULT NOW() NOT NULL
+    );
+  `);
+
+  await db.execute(sql`
+    CREATE TABLE tokens (
+      user_id INTEGER REFERENCES users(id) ON DELETE CASCADE PRIMARY KEY,
+      daily_tokens INTEGER DEFAULT 1 NOT NULL,
+      weekly_tokens INTEGER DEFAULT 2 NOT NULL
+    );
+  `);
+
+  await db.execute(sql`
+    CREATE TABLE fetched_messages (
+      user_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+      message_id INTEGER REFERENCES messages(id) ON DELETE CASCADE NOT NULL
+    );
+  `);
+
+  await db.execute(sql`
+    CREATE TABLE token_reset (
+      id SERIAL PRIMARY KEY,
+      last_daily_reset TIMESTAMP NOT NULL DEFAULT NOW(),
+      last_weekly_reset TIMESTAMP NOT NULL DEFAULT NOW()
+    );
+  `);
+}
