@@ -2,8 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+html{
+  font-family: 'Helvetica', 'Roboto', sans-serif;
+}
 
 body {
+  font-family: 'Helvetica', 'Roboto', sans-serif;
   color: rgb(var(--foreground-rgb));
   background: linear-gradient(
       to bottom,
@@ -15,15 +19,26 @@ body {
 
 @layer utilities {
   .text-balance {
+    font-family: 'Helvetica', 'Roboto', sans-serif;
     text-wrap: balance;
   }
 }
 
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Helvetica', 'Roboto', sans-serif;
+}
+
+p, a, li, span, div {
+  font-family: 'Helvetica', 'Roboto', sans-serif;
+}
+
 .username {
-  margin-right: 2px; /* Adjust the value as needed */
+  font-family: 'Helvetica', 'Roboto', sans-serif;
+  margin-right: 2px;
 }
 
 .chat-header {
+  font-family: 'Helvetica', 'Roboto', sans-serif;
   display: flex;
   align-items: center;
 }

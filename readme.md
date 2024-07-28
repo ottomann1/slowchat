@@ -1,69 +1,63 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/Ub_qRA-u)
-## Final weekend assignment 😱 💀
+## Otto Kostmanns final weekend assignment
 
-You will build a full-stack slow-messaging app.
+Welcome to this amazing piece of software. A group messaging app where messages go on a cooldown for an hour before you can fetch them and fetching is limited.
 
-## Notes on the final assignment
+## Planning
 
-The submission should represent the best you can do in this given timespan. The requirements are things that you should make extra sure to include, and failing to fulfill them will most likely lead to the submission being marked as a fail.
+I did most of my planning on paper notes along with GitHub Projects, which will be linked [[Here]](https://github.com/orgs/saltsthlm/projects/66/).
 
-Failed submissions will have one extra attempt during an upcoming weekend.
+I'll just rewrite my notes into text right here also:
 
-Developers need to be mentally prepared for the test to take more than 8h per day Friday-Sunday.
-Deadline for this one is extended until 08:00 on Monday.
+Sprint 1: Friday - Skeleton mostly finished. Login page, chatroom and should atleast send messages. Statistics not so important but good if done.
 
-No code is provided in the final assignment.
+Sprint 2: Saturday Morning - Skeleton finished, all basic functionality done, requirements atleast.
 
-## Background
+Sprint 3: Saturday Evening - Start looking more into error handling and tests
 
-You will build a group messaging app where the goal is to get the users to use the app as little as possible.
+Sprint 4: Sunday Morning - Styling to be done
 
-The user can fetch all messages once a day, with two extra fetches that refills every Sunday.
+Sprint 5: Sunday Evening - Refactoring
 
-A message posted to the server will be on cooldown for one hour before they are allowed to be fetched.
+[[UI plan]](https://utfs.io/f/c2e54c5a-72bc-4243-8e5e-3f4f4713d2b2-1xbxjx.jpg)
 
-Messages on cooldown should be included in the fetched messages, but only with metadata like the author and timestamp of the message, but not the actual content.
+I made a few pretty scrambled notes to help me get a better idea of what I'm going to do, they might not make much sense to anyone but me but here's what they said:
 
+Login, choose any username at login, password has to be correct though
+First version, try with no cookies. Just log in with a global variable
+Use which components? ShadCN, DaisyUI or nextui?
 
-### Example
-```
-Gareth sends the message "Hi everyone!" at 13:15 on Monday.
-Farah sends the message "Amazing app :-)" at 14:00 on Monday.
+Login screen at main page
+Main page is a group chatroom
+Statistics page
 
-Gareth has all his 3 fetch tokens left.
-Gareth clicks the button [Fetch Messages] to fetch new messages at 14:15 on Monday. He will now have 2 fetch tokens left.
-Gareth gets to see his own message "Hi everyone!", and sees that a message from Farah is on cooldown until 15:00.
-At 14:30 Gareth fetches again. He now has one fetch token left. He sees that there's no new messages.
-At 15:00 Gareth fetches again. He is now out of tokens. He can now see both his and Farah's message.
-On Tuesday at 00:00 UTC time, Gareth gets one new daily fetch token. He now has one fetch token.
-On Sunday at 00:00 UTC time, Gareth gets two new weekly fetch tokens. He now has three fetch tokens.
-Next Sunday at 00:00 UTC time, Gareth already has all daily and weekly tokens, so he stays at three fetch tokens.
-```
+Zod validation
+Testing
 
-## Requirements
+Try using messages directly in page and also doing DB query directly if that solves revalidatepath
+//
 
-- Tech stack: Next.js, Drizzle, Postgres, Zod, ESLint, TypeScript.
-- A readme explaining your big-picture plan, challenges you encountered, choices made, and highlights in your solution.
-- GitHub planning board.
-- You should have big picture goals as your sprint goals; and at a minimum of 4 sprint goals should be done so it's simple to understand how you divided your work into large chunks.
-- Good UI design, including good choice of font, color, layout, and component design.
-- Responsive design that works well on both mobile and on laptop.
-- Semantic HTML.
-- Tidy code.
-- Good file structure.
-- All business logic should be tested with automated tests.
-- Tests should have clear names that explain how your code behaves.
-- Added `"lint"` and `"test"` scripts in package.json.
-- Clean commits.
-- The user should be able to login with any chosen username and a shared password.
-- The password should be the same for all users and set using an environment variable that the server can read from.
-- There should be a page showing statistics for all users.
-- The statistics page should show how many messages that a user has written in total, number of written messages per message-fetch, and number of received new messages per message-fetch that were not on cooldown.
-- The statistics page does not _require_ graphs, just numbers.
-- The design of the statistics page can be very plain, and only needs to work on a laptop.
+That last note was for one of my biggest challenges in using next.js, which was issues relating to server/client components and caching.
+I couldn't find super good information on these topics but I read a bunch of documentation and tested different things until I made it work.
+For a long time I couldn't figure out why revalidatepath wouldnt refresh the data, I think I went on a break or something and I just had that thought that maybe I need to load the variables in the main page file and then send them into my components as props for it to work.
+I was correct. At first I did a full page refresh which worked but was not so smooth, using revalidatepath made it alot better looking because the whole page won't have to reload just because you send a message or fetch.
+Other challenges I faced was I suppose DB schemas, although not much to say except it can be a bit annoying.
+Making all the relations correct, setting the variables and cascade the way they should be and such.
+Also had some issues with testing because of database.
+I ended up just dropping and recreating the tables every test and that solved issues.
 
-## Tips and general comments
+These notes pretty well explain my big picture plan, I was pretty stressed about this weekend because I got a warning during the week and also performed poorly on one of the group assignments.
+As you may notice I tried to squeeze very much into the first 2 sprints so that if there would be issues (which there usually are) then I'd have plenty of time to solve them.
+I'm glad I did because even if I saw myself as being mostly doing well on time throughout all the sprints there would pop up different issues here and there.
+By the end of sprint 3 I felt pretty confident I would be able to finish on time so I got some free time even.
+Styling, refactoring and tests kind of went in to each other and the planning turned a bit messy by sprint 4 and 5.
+It just felt more natural doing refactoring before finishing up the styling and tests, it would probably have resulted in me having to redo alot of it otherwise.
 
-- If you think about what information you store in the database, and what information you calculate based on the stored data, you can have a simpler time. Storing the wrong information might lead to you getting stuck and needing to start over. Pay extra attention to the data related to cooldown and the message-fetch data.
-- The assignment might feel dreadingly hard, or surprisingly simple. Either way, plan on getting the "walking skeleton" in place as soon as possible. A walking skeleton has no UI design, and no real business logic. It just connects all the layers of the app together and makes the right function calls. You can come a long way with mock data and then use unit tests to make sure your business logic covers all the edge cases.
-- Break out the business logic to pure functions that take simple Date objects, numbers, string, etc, as arguments. If you try to test the business logic by getting the real current time, then it would take two weeks to test the example scenario.
+I ended up using DaisyUI for my components, I thought they looked pretty good and fit the style I had in mind. 
+Along with them I went with a dark color scheme because I thought it fit the chill vibes of the app.
+For my font family I chose Helvetica, Roboto, sans-serif. I think this font family looks cool and Helvetica is probably my favorite font.
+Not that I'm very into fonts but still.
+
+For the login page I went pretty basic but with the high quality components and such it still looks pretty cool in my opinion.
+By the time you get to the chat page you can tell maybe that I prefer things to be simple but preferably still look good and high quality.
+I don't really know what more to say about it, I wanted it to looks good and be effective and I think I did a pretty good job.
+I think maybe the UI looks a bit scuffed with no messages in the chatbox but in a realistic use case that won't really happen.

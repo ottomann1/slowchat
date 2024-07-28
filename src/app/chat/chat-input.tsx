@@ -1,13 +1,27 @@
 "use client";
 import { addMessage } from "@/actions/actions";
 import { useState } from "react";
+import { z } from "zod";
+
+const messageSchema = z.string().min(1, { message: "Message cannot be empty" });
 
 export default function ChatInput() {
   const [newMessage, setNewMessage] = useState("");
+  const [error, setError] = useState("");
 
   async function sendMessage() {
-    addMessage(newMessage);
-    setNewMessage("");
+    try {
+      messageSchema.parse(newMessage);
+      await addMessage(newMessage);
+      setNewMessage("");
+      setError("");
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        setError(err.errors[0].message);
+      } else {
+        setError("An unexpected error occurred");
+      }
+    }
   }
 
   return (
@@ -29,6 +43,7 @@ export default function ChatInput() {
           Send
         </button>
       </div>
+      {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
     </section>
   );
 }

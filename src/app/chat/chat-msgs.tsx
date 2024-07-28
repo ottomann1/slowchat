@@ -9,7 +9,7 @@ interface ChatMsgsProps {
 export default function ChatMsgs({ messages, currUser }: ChatMsgsProps) {
   //This is chatmessages, it prints messages that are fetched.
   return (
-    <section className="card bg-base-300 rounded-box p-4">
+    <section className="card bg-base-300 rounded-box p-4 flex-grow overflow-y-auto" style={{ height: "70vh" }}>
       {messages.map((message) => (
         <article
           key={message.id}

@@ -14,7 +14,10 @@ export default async function ChatPage() {
   //This is the chat-page! As you can see it collects plenty of data and then prints it in appropriate sections
   const currUser: User = await getUser();
   const fetchesLeft = await getTokensLeft(currUser.id);
-  const importMessages = await fetchAllUnfetchedMessages(currUser.id, Date.now());
+  const importMessages = await fetchAllUnfetchedMessages(
+    currUser.id,
+    Date.now()
+  );
   const displayMessages = await fetchFetchedMessages(currUser.id, Date.now());
   const fetchProps = { importMessages, fetchesLeft };
   console.log("tokens left ", fetchesLeft);
