@@ -1,6 +1,6 @@
 ## About this project
 
-This was my final weekend assignment for salt, it was a sort of technical assessment where we were tested on our highest capabilities during 3 days.
+This was my final weekend assignment for salt, it was a sort of technical assessment where we were tested on our highest capabilities in a 3 day period.
 
 So this is the result!
 
