@@ -1,3 +1,9 @@
+## About this project
+
+This was my final weekend assignment for salt, it was a sort of technical assessment where we were tested on our highest capabilities during 3 days.
+
+So this is the result!
+
 ## Otto Kostmanns final weekend assignment
 
 Welcome to this amazing piece of software. A group messaging app where messages go on a cooldown for an hour before you can fetch them and fetching is limited.
