@@ -6,7 +6,12 @@ import dotenv from "dotenv";
 
 // Load environment variables from .env file
 dotenv.config();
+console.log(process.env.POSTGRES_URL)
 
+console.log(process.env.POSTGRES_USER)
+console.log(process.env.POSTGRES_HOST)
+console.log(process.env.POSTGRES_DATABASE)
+console.log(process.env.POSTGRES_PASSWORD)
 const pool = new Pool({
   user: process.env.POSTGRES_USER,
   host: process.env.POSTGRES_HOST,
