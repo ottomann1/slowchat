@@ -178,67 +178,79 @@ export async function decrementFetchToken(userId: number) {
 }
 
 export async function getStatistics(currDate: number): Promise<Statistics[]> {
-  const userMessagesCount = await db
-    .select({
-      userId: user.id,
-      username: user.name,
-      totalMessages: count(message.id),
-    })
-    .from(user)
-    .leftJoin(message, eq(user.id, message.userId))
-    .groupBy(user.id);
+  try {
+    // Fetch user messages count
+    const userMessagesCount = await db
+      .select({
+        userId: user.id,
+        username: user.name,
+        totalMessages: count(message.id),
+      })
+      .from(user)
+      .leftJoin(message, eq(user.id, message.userId))
+      .groupBy(user.id);
 
-  const userFetchesCount = await db
-    .select({ userId: user.id, totalFetches: user.totalFetches })
-    .from(user);
+    // Fetch total fetches count
+    const userFetchesCount = await db
+      .select({ userId: user.id, totalFetches: user.totalFetches })
+      .from(user);
 
-  const userFetchesNoCooldownCount = await db
-    .select({
-      userId: fetchedMessages.userId,
-      totalFetchesNoCooldown: count(fetchedMessages.messageId),
-    })
-    .from(fetchedMessages)
-    .leftJoin(message, eq(fetchedMessages.messageId, message.id))
-    .where(
-      and(
-        lt(message.time, new Date(currDate - 60 * 60 * 1000)),
-        ne(message.userId, fetchedMessages.userId)
+    // Fetch no cooldown fetches count
+    const userFetchesNoCooldownCount = await db
+      .select({
+        userId: fetchedMessages.userId,
+        totalFetchesNoCooldown: count(fetchedMessages.messageId),
+      })
+      .from(fetchedMessages)
+      .leftJoin(message, eq(fetchedMessages.messageId, message.id))
+      .where(
+        and(
+          lt(message.time, new Date(currDate - 60 * 60 * 1000)),
+          ne(message.userId, fetchedMessages.userId)
+        )
       )
-    )
-    .groupBy(fetchedMessages.userId);
+      .groupBy(fetchedMessages.userId);
 
-  const userStatisticsPromises = userMessagesCount.map(async (user) => {
-    const usersFetchCount = userFetchesCount.find(
-      (fetchCount) => fetchCount.userId === user.userId
-    );
-    const totalFetches = usersFetchCount?.totalFetches || 0;
+    // Construct user statistics
+    const userStatisticsPromises = userMessagesCount.map(async (user) => {
+      const usersFetchCount = userFetchesCount.find(
+        (fetchCount) => fetchCount.userId === user.userId
+      );
+      const totalFetches = usersFetchCount?.totalFetches || 0;
 
-    const usersMessagesFetchedCount = userFetchesNoCooldownCount.find(
-      (messagesFetched) => messagesFetched.userId === user.userId
-    );
-    const totalFetchesNoCooldown =
-      usersMessagesFetchedCount?.totalFetchesNoCooldown || 0;
+      const usersMessagesFetchedCount = userFetchesNoCooldownCount.find(
+        (messagesFetched) => messagesFetched.userId === user.userId
+      );
+      const totalFetchesNoCooldown =
+        usersMessagesFetchedCount?.totalFetchesNoCooldown || 0;
 
-    const totalAverageMessagesPerFetch = await averageMessagesPerFetch(
-      user.totalMessages,
-      totalFetches
-    );
+      const totalAverageMessagesPerFetch = await averageMessagesPerFetch(
+        user.totalMessages,
+        totalFetches
+      );
 
-    return {
-      userId: user.userId,
-      username: user.username,
-      totalMessages: user.totalMessages,
-      totalFetches: totalFetches,
-      totalAverageMessagesPerFetch: totalAverageMessagesPerFetch,
-      totalFetchesNoCooldown: totalFetchesNoCooldown,
-    };
-  });
+      return {
+        userId: user.userId,
+        username: user.username,
+        totalMessages: user.totalMessages,
+        totalFetches: totalFetches,
+        totalAverageMessagesPerFetch: totalAverageMessagesPerFetch,
+        totalFetchesNoCooldown: totalFetchesNoCooldown,
+      };
+    });
 
-  const userStatistics = await Promise.all(userStatisticsPromises);
+    const userStatistics = await Promise.all(userStatisticsPromises);
 
-  userStatistics.sort((a, b) => a.username.localeCompare(b.username));
-  return userStatistics;
+    // Sort statistics alphabetically by username
+    userStatistics.sort((a, b) => a.username.localeCompare(b.username));
+    return userStatistics;
+
+  } catch (error) {
+    console.error("Error fetching user statistics:", error);
+    return []; // Return an empty array or handle the error as needed
+  }
 }
+
 
 export async function averageMessagesPerFetch(
   usersFetchCount: number,
