@@ -11,7 +11,7 @@ console.log("drizzleindex password", process.env.POSTGRES_PASSWORD)
 console.log("drizzleindex public url", process.env.NEXT_PUBLIC_POSTGRES_PASSWORD)
 
 const pool = new Pool({
-  connectionString: process.env.POSTGRES_URL,
+  connectionString: "postgres://postgres:party@34.88.234.134:5432/postgres",
 });
 
 const db = drizzle(pool, { schema });
