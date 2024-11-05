@@ -24,6 +24,12 @@ jobs:
         run: "gcloud config set run/region europe-north1"
 
       - name: "Deploy to Cloud Run"
+        env:
+          POSTGRES_URL: ${{ secrets.POSTGRES_URL }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DATABASE: ${{ secrets.POSTGRES_DATABASE }}
+          POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
         run: |
           gcloud run deploy slowchat \
             --source . \
