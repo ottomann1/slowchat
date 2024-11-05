@@ -4,14 +4,14 @@ import { Pool } from "pg";
 import * as schema from "./schema";
 import dotenv from "dotenv";
 
-// Load environment variables from .env file
+// Load environment variables"drizzle url",  from .env file
 dotenv.config();
-console.log(process.env.POSTGRES_URL)
+console.log("drizzleindex url", process.env.POSTGRES_URL)
 
-console.log(process.env.POSTGRES_USER)
-console.log(process.env.POSTGRES_HOST)
-console.log(process.env.POSTGRES_DATABASE)
-console.log(process.env.POSTGRES_PASSWORD)
+console.log("drizzleindex user", process.env.POSTGRES_USER)
+console.log("drizzleindex host", process.env.POSTGRES_HOST)
+console.log("drizzleindex database", process.env.POSTGRES_DATABASE)
+console.log("drizzleindex password", process.env.POSTGRES_PASSWORD)
 const pool = new Pool({
   user: process.env.POSTGRES_USER,
   host: process.env.POSTGRES_HOST,
