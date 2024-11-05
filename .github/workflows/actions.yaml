@@ -1,0 +1,23 @@
+name: Authenticate to Google Cloud
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: "google-github-actions/auth@v2.1.3"
+        with:
+          credentials_json: "${{ secrets.OTTO }}"
+
+      - name: "Set up Cloud SDK"
+        uses: "google-github-actions/setup-gcloud@v2"
+
+      - name: "Use gcloud CLI"
+        run: "gcloud info"
+
+      - name: "Set region for Cloud Run"
+        run: "gcloud config set run/region europe-north1"
+
+      - name: "Run slowchat"
+        run: "gcloud run deploy slowchat --source . --allow-unauthenticated"
