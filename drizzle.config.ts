@@ -1,9 +1,8 @@
 import { defineConfig } from 'drizzle-kit';
-import dotenv from 'dotenv';
+import "dotenv/config";
 
-dotenv.config();
+
 console.log("drizzleconf url", process.env.POSTGRES_URL)
-
 console.log("drizzleconf user", process.env.POSTGRES_USER)
 console.log("drizzleconf host", process.env.POSTGRES_HOST)
 console.log("drizzleconf database", process.env.POSTGRES_DATABASE)

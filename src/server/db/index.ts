@@ -2,12 +2,9 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import * as schema from "./schema";
-import dotenv from "dotenv";
+import "dotenv/config";
 
-// Load environment variables"drizzle url",  from .env file
-dotenv.config();
 console.log("drizzleindex url", process.env.POSTGRES_URL)
-
 console.log("drizzleindex user", process.env.POSTGRES_USER)
 console.log("drizzleindex host", process.env.POSTGRES_HOST)
 console.log("drizzleindex database", process.env.POSTGRES_DATABASE)
