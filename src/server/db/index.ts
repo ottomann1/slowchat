@@ -8,6 +8,8 @@ console.log("drizzleindex user", process.env.POSTGRES_USER)
 console.log("drizzleindex host", process.env.POSTGRES_HOST)
 console.log("drizzleindex database", process.env.POSTGRES_DATABASE)
 console.log("drizzleindex password", process.env.POSTGRES_PASSWORD)
+console.log("drizzleindex public url", process.env.NEXT_PUBLIC_POSTGRES_PASSWORD)
+
 const pool = new Pool({
   connectionString: process.env.POSTGRES_URL,
 });
