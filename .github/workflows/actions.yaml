@@ -1,5 +1,12 @@
+
 name: Authenticate to Google Cloud
-on: [push, pull_request]
+
+on: 
+  push:
+    branches:
+      - main
+  pull_request:
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -13,11 +20,14 @@ jobs:
       - name: "Set up Cloud SDK"
         uses: "google-github-actions/setup-gcloud@v2"
 
-      - name: "Use gcloud CLI"
-        run: "gcloud info"
-
       - name: "Set region for Cloud Run"
         run: "gcloud config set run/region europe-north1"
 
-      - name: "Run slowchat"
-        run: "gcloud run deploy slowchat --source . --allow-unauthenticated"
+      - name: "Deploy to Cloud Run"
+        run: |
+          gcloud run deploy slowchat \
+            --source . \
+            --allow-unauthenticated \
+            --update-env-vars POSTGRES_URL=${{ secrets.POSTGRES_URL }},POSTGRES_USER=${{ secrets.POSTGRES_USER }},POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }},POSTGRES_DATABASE=${{ secrets.POSTGRES_DATABASE }},POSTGRES_HOST=${{ secrets.POSTGRES_HOST }} \
+            --platform managed
+
