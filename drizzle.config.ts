@@ -10,7 +10,9 @@ console.log("drizzleconf password", process.env.POSTGRES_PASSWORD)
 
 export default defineConfig({
   dialect: "postgresql",
-  dbCredentials: { url: process.env.POSTGRES_URL! },
+  //yes this is not how you should do it but gcl refuses to load my
+  //environment variables during build and i cba
+  dbCredentials: { url: "postgres://postgres:party@34.88.234.134:5432/postgres" },
   schema: "./src/server/db/schema.ts",
   out: "./drizzle",
 });
