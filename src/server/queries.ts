@@ -243,6 +243,7 @@ export async function getStatistics(currDate: number): Promise<Statistics[]> {
 
     // Sort statistics alphabetically by username
     userStatistics.sort((a, b) => a.username.localeCompare(b.username));
+    console.log("stats", userStatistics)
     return userStatistics;
 
   } catch (error) {

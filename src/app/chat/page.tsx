@@ -10,6 +10,7 @@ import Link from "next/link";
 import { logOut } from "@/actions/actions";
 import { User } from "@/lib/types";
 
+export const dynamic = 'force-dynamic';
 export default async function ChatPage() {
   //This is the chat-page! As you can see it collects plenty of data and then prints it in appropriate sections
   const currUser: User = await getUser();

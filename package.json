@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "verbosebuild": "next build --debug",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "start": "next start",
