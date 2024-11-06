@@ -39,6 +39,7 @@ export function LoginForm() {
           <p className="text-m text-center">
             Welcome to the slow group messaging app
           </p>
+
         </header>
       </section>
 
@@ -78,6 +79,8 @@ export function LoginForm() {
             <button type="submit" className="btn w-full max-w-xs">
               Login
             </button>
+            <p className="text-xs text-center text-gray-500 mt-4">default password is password</p>
+            <p className="text-xs text-center text-gray-500">choose any username</p>
           </div>
         </form>
       </section>
