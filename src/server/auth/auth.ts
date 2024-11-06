@@ -1,19 +1,16 @@
 "use server";
 import "dotenv/config";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import { user } from "../db/schema";
 import { findUserByName, postUser } from "../queries";
 
 type getUser = typeof user.$inferSelect;
 export const auth = async (username: string, password: string) => {
   const sharedPassword = process.env.SHARED_PASSWORD;
-
   if (password === sharedPassword) {
     cookies().set("slowuser", username);
     await checkAndPostUser(username);
     return { success: true, username };
-    redirect("/");
   }
 
   throw new Error("Invalid password");
@@ -40,7 +37,7 @@ export async function checkAndPostUser(username: string) {
   }
 }
 
-export async function getLoggedIn(): Promise<string|null> {
+export async function getLoggedIn(): Promise<string | null> {
   const user = cookies().get("slowuser")?.value;
   if (!user) return null;
   return user;
@@ -48,7 +45,7 @@ export async function getLoggedIn(): Promise<string|null> {
 
 export async function getUser(): Promise<getUser> {
   const user = await getLoggedIn();
-  if(!user){
+  if (!user) {
     throw new Error("Not logged in")
   }
   const currUser = await findUserByName(user);
