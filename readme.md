@@ -4,6 +4,8 @@ This was my final weekend assignment for salt, it was a sort of technical assess
 
 So this is the result!
 
+Check it out at https://slowchat-876198057788.europe-north1.run.app/chat
+
 ## Otto Kostmanns final weekend assignment
 
 Welcome to this amazing piece of software. A group messaging app where messages go on a cooldown for an hour before you can fetch them and fetching is limited.
