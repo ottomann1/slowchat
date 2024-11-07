@@ -4,7 +4,7 @@ This was my final weekend assignment for salt, it was a sort of technical assess
 
 So this is the result!
 
-Check it out at https://slowchat-876198057788.europe-north1.run.app/chat
+Check it out at https://slowchat-876198057788.europe-north1.run.app
 
 ## Otto Kostmanns final weekend assignment
 
